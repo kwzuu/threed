@@ -1,28 +1,16 @@
-#![feature(cell_update)]
-
+#![feature(const_fn_floating_point_arithmetic)]
 mod physics;
 
-/// This example shows how to describe the adapter in use.
-async fn run() {
-    let adapter = {
-        let instance = wgpu::Instance::default();
-        #[cfg(not(target_arch = "wasm32"))]
-        {
-            log::info!("Available adapters:");
-            for a in instance.enumerate_adapters(wgpu::Backends::all()) {
-                log::info!("    {:?}", a.get_info())
-            }
-        }
-        instance
-            .request_adapter(&wgpu::RequestAdapterOptions::default())
-            .await
-            .unwrap()
-    };
-
-    log::info!("Selected adapter: {:?}", adapter.get_info())
-}
+use std::{thread, time};
+use kiss3d::window::Window;
+use crate::physics::simulation::GravitySimulation;
 
 fn main() {
-    env_logger::init();
-    pollster::block_on(run());
+    let mut window = Window::new("physics");
+    let mut simulation = GravitySimulation::new(20, 60., &mut window);
+
+    while window.render() {
+        simulation.tick();
+        thread::sleep(time::Duration::from_secs_f32(1./60.));
+    }
 }

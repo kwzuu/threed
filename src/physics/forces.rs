@@ -1,13 +1,17 @@
 use std::ops::{Add, Neg, Sub};
 use crate::physics::physics_object::PhysicsObject;
-use crate::physics::vectors::Vector3;
+use kiss3d::nalgebra::Vector3;
 
 #[derive(Copy, Clone)]
-pub struct Force(pub(crate) Vector3);
+pub struct Force(pub(crate) Vector3<f32>);
 
-pub const GRAVITATIONAL_CONSTANT: f64 = 6.6743e-11;
+pub const GRAVITATIONAL_CONSTANT: f32 = 6.6743e-11;
 
 impl Force {
+    pub fn zeroes() -> Self {
+        Self(Vector3::zeros())
+    }
+
     pub fn gravity(o1: &PhysicsObject, o2: &PhysicsObject) -> Self {
         let diff = o1.position - o2.position;
 
@@ -18,7 +22,7 @@ impl Force {
             * o1.mass * o2.mass
             / (distance * distance);
 
-        Self(diff.normalize().scale(mag))
+        Self(-diff.normalize().scale(mag))
     }
 }
 
